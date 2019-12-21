@@ -752,7 +752,8 @@ class TCMD():
 		                           "/ctrl - Use self defined controls from Octoprint.\n"
 		                           "/tune - Set feed- and flowrate. Control temperatures.\n"
 		                           "/user - Get user info.\n"
-		                           "/help - Show this help message."),chatID=chat_id,markup="Markdown")
+		                           "/help - Show this help message.\n"
+								   "asdfasdfasdf"),chatID=chat_id,markup="Markdown")
 ############################################################################################
 # FILE HELPERS
 ############################################################################################
