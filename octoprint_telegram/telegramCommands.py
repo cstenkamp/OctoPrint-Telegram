@@ -4,6 +4,7 @@ import octoprint.filemanager
 import requests
 from flask.ext.babel import gettext
 from .telegramNotifications import telegramMsgDict
+import api_calls
 
 ################################################################################################################
 # This class handles received commands/messages (commands in the following). commandDict{} holds the commands and their behavior.
@@ -44,8 +45,7 @@ class TCMD():
 			'/con': 		{'cmd': self.cmdConnection, 'param': True},
 			'/user': 		{'cmd': self.cmdUser},
 			'/tune':		{'cmd': self.cmdTune, 'param': True},
-			'/turnon': 		{'cmd': self.cmdConnection},
-			# '/turnon': 		{'cmd': self.cmdTurnOn},
+			'/turnon': 		{'cmd': self.cmdTurnOn},
 			# '/apicmd': 		{'cmd': self.cmdTurnOn},
 			'/help':  		{'cmd': self.cmdHelp, 'bind_none': True}
 		}
@@ -396,8 +396,8 @@ class TCMD():
 			self.main.send_msg(message,chatID=chat_id,responses=keys,msg_id=msg_id)
 ############################################################################################
 	def cmdCtrl(self,chat_id,from_id,cmd,parameter):
-		# if not self.main._printer.is_operational():
-		# 	self.main.send_msg(self.gEmo('warning')+" Printer not connected. You can't send any command.",chatID=chat_id)
+		if not self.main._printer.is_operational():
+			self.main.send_msg(self.gEmo('warning')+" Printer not connected. Sending commands may not work.",chatID=chat_id)
 		# 	return
 		if parameter and parameter != "back":
 			params = parameter.split('_')
@@ -445,50 +445,60 @@ class TCMD():
 			msg_id=self.main.getUpdateMsgId(chat_id) if parameter == "back" else ""
 			self.main.send_msg(message,chatID=chat_id,responses=keys,msg_id = msg_id)
 ############################################################################################
-	def cmdUser(self,chat_id,from_id,cmd,parameter):
-		msg = self.gEmo('info') + " *Your user settings:*\n\n"
-		msg += "*ID:* " + str(chat_id) + "\n"
-		msg += "*Name:* " + self.main.chats[chat_id]['title'] + "\n"
-		if self.main.chats[chat_id]['private']:
-			msg += "*Type:* Private\n\n"
-		else:
-			msg += "*Type:* Group\n"
-			if self.main.chats[chat_id]['accept_commands']:
-				msg += "*Accept-Commands:* All users\n\n"
-			elif self.main.chats[chat_id]['allow_users']:
-				msg += "*Accept-Commands:* Allowed users\n\n"
+	def cmdCtrl(self,chat_id,from_id,cmd,parameter):
+		if not self.main._printer.is_operational():
+			self.main.send_msg(self.gEmo('warning')+" Printer not connected. Sending commands may not work.",chatID=chat_id)
+		# 	return
+		if parameter and parameter != "back":
+			params = parameter.split('_')
+			if params[0] == "do":
+				parameter = params[1]
 			else:
-				msg += "*Accept-comands:* None\n\n"
-
-		msg += "*Allowed commands:*\n"
-		if self.main.chats[chat_id]['accept_commands']:
-			myTmp = 0
-			for key in self.main.chats[chat_id]['commands']:
-				if self.main.chats[chat_id]['commands'][key]:
-					msg += key + ", "
-					myTmp += 1
-			if myTmp < 1:
-				msg += "You are NOT allowed to send any command."
-			msg += "\n\n"
-		elif self.main.chats[chat_id]['allow_users']:
-			msg += "Allowed users ONLY. See specific user settings for details.\n\n"
+				parameter = params[0]
+			actions = self.get_controls_recursively()
+			command = next((d for d in actions if d['hash'] == parameter), False)
+			if command:
+				if 'confirm' in command and params[0] != "do":
+					self.main.send_msg(self.gEmo('question') + unicode(command['name']) + "\nExecute control command?",responses=[[[self.main.emojis['check']+gettext("Execute"),"/ctrl_do_" + unicode(parameter)], [self.main.emojis['leftwards arrow with hook']+gettext(" Back"),"/ctrl_back"]]],chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+					return
+				else:
+					if 'script' in command:
+						try:
+							self.main._printer.script(command["command"])
+						except UnknownScript:
+							self.main.send_msg(self.gEmo('warning') + " Unknown script: " + command['command'],chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+					elif type(command['command']) is type([]):
+						for key in command['command']:
+							self.main._printer.commands(key)
+					else:
+						self.main._printer.commands(command['command'])
+					self.main.send_msg(self.gEmo('check') + " Control Command " + command['name'] + " executed." ,chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+			else:
+				self.main.send_msg(self.gEmo('warning') + " Control Command not found." ,chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
 		else:
-			msg += "You are NOT allowed to send any command.\n\n"
-
-		msg += "*Get notification on:*\n"
-		if self.main.chats[chat_id]['send_notifications']:
-			myTmp = 0
-			for key in self.main.chats[chat_id]['notifications']:
-				if self.main.chats[chat_id]['notifications'][key]:
-					msg += key + ", "
-					myTmp += 1
-			if myTmp < 1:
-				msg += "You will receive NO notifications."
-			msg += "\n\n"
-		else:
-			msg += "You will receive NO notifications.\n\n"
-
-		self.main.send_msg(msg, chatID=chat_id, markup="Markdown")
+			message = self.gEmo('info') + " The following Printer Controls are known."
+			empty = True
+			keys = []
+			tmpKeys = []
+			i = 1
+			for action in self.get_controls_recursively():
+				empty=False
+				tmpKeys.append([unicode(action['name']),"/ctrl_" + str(action['hash'])])
+				if i%2 == 0:
+					keys.append(tmpKeys)
+					tmpKeys = []
+				i += 1
+			if len(tmpKeys) > 0:
+				keys.append(tmpKeys)
+			keys.append([[self.main.emojis['cross mark']+gettext(" Close"),"No"]])
+			if empty: message += "\n\n"+self.gEmo('warning')+" No Printer Control Command found..."
+			msg_id=self.main.getUpdateMsgId(chat_id) if parameter == "back" else ""
+			self.main.send_msg(message,chatID=chat_id,responses=keys,msg_id = msg_id)
+############################################################################################
+	def cmdTurnOn(self,chat_id,from_id,cmd,parameter):
+		results = api_calls.post_command('api/plugin/psucontrol', 'turnPSUOn')
+		for elem in results:
+			self.main.send_msg(elem, chatID=chat_id, markup="Markdown")
 ############################################################################################
 	def cmdConnection(self,chat_id,from_id,cmd,parameter):
 		if parameter and parameter != "back":
@@ -752,8 +762,7 @@ class TCMD():
 		                           "/ctrl - Use self defined controls from Octoprint.\n"
 		                           "/tune - Set feed- and flowrate. Control temperatures.\n"
 		                           "/user - Get user info.\n"
-		                           "/help - Show this help message.\n"
-								   "asdfasdfasdf"),chatID=chat_id,markup="Markdown")
+		                           "/help - Show this help message.\n"),chatID=chat_id,markup="Markdown")
 ############################################################################################
 # FILE HELPERS
 ############################################################################################
