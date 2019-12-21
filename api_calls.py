@@ -1,19 +1,33 @@
 import requests
-import curlify
 import json
+import os
+from os.path import join
 
-import credentials
+import curlify
+import yaml
+
+
+
+try:
+	import credentials
+	API_KEY = credentials.API_KEY
+	IP = credentials.IP
+except ModuleNotFoundError:
+	IP = 'http://127.0.0.1'
+	with open(join(os.environ['HOME'], '.octoprint', 'config.yaml'), 'r') as stream:
+		confyaml = yaml.safe_load(stream)
+		API_KEY = confyaml['api']['key']
 
 
 requestHeaders = {
 	"Content-Type": "application/json",
-    "X-Api-Key": credentials.API_KEY,
+    "X-Api-Key": API_KEY,
 }
 
 
 def post_command(url, command):
 	if not url.startswith('/'): url = '/'+url
-	url = credentials.IP+url
+	url = IP + url
 	requestData = json.dumps({
 		"command": command
 	})
