@@ -4,7 +4,7 @@ import octoprint.filemanager
 import requests
 from flask.ext.babel import gettext
 from .telegramNotifications import telegramMsgDict
-import api_calls
+from .api_calls import post_command
 
 ################################################################################################################
 # This class handles received commands/messages (commands in the following). commandDict{} holds the commands and their behavior.
