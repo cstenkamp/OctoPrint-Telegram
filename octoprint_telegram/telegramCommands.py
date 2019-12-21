@@ -764,7 +764,7 @@ class TCMD():
 		                           "/user - Get user info.\n"
 		                           "/help - Show this help message.\n"
 		                           "/turnon - Turns the Printer on (using PSU-Control over the API).\n" #TODO apicmd
-		                           "/help - Show this help message.\n"
+		                           "/help - Show this help message.\n"))
 ############################################################################################
 # FILE HELPERS
 ############################################################################################
