@@ -12,7 +12,7 @@ try:
 	import credentials
 	API_KEY = credentials.API_KEY
 	IP = credentials.IP
-except ModuleNotFoundError:
+except:
 	IP = 'http://127.0.0.1'
 	with open(join(os.environ['HOME'], '.octoprint', 'config.yaml'), 'r') as stream:
 		confyaml = yaml.safe_load(stream)
