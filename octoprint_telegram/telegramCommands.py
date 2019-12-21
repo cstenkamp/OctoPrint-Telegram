@@ -496,9 +496,54 @@ class TCMD():
 			self.main.send_msg(message,chatID=chat_id,responses=keys,msg_id = msg_id)
 ############################################################################################
 	def cmdTurnOn(self,chat_id,from_id,cmd,parameter):
-		results = api_calls.post_command('api/plugin/psucontrol', 'turnPSUOn')
+		results = post_command('api/plugin/psucontrol', 'turnPSUOn')
 		for elem in results:
 			self.main.send_msg(elem, chatID=chat_id, markup="Markdown")
+############################################################################################
+	def cmdUser(self,chat_id,from_id,cmd,parameter):
+		msg = self.gEmo('info') + " *Your user settings:*\n\n"
+		msg += "*ID:* " + str(chat_id) + "\n"
+		msg += "*Name:* " + self.main.chats[chat_id]['title'] + "\n"
+		if self.main.chats[chat_id]['private']:
+			msg += "*Type:* Private\n\n"
+		else:
+			msg += "*Type:* Group\n"
+			if self.main.chats[chat_id]['accept_commands']:
+				msg += "*Accept-Commands:* All users\n\n"
+			elif self.main.chats[chat_id]['allow_users']:
+				msg += "*Accept-Commands:* Allowed users\n\n"
+			else:
+				msg += "*Accept-comands:* None\n\n"
+
+		msg += "*Allowed commands:*\n"
+		if self.main.chats[chat_id]['accept_commands']:
+			myTmp = 0
+			for key in self.main.chats[chat_id]['commands']:
+				if self.main.chats[chat_id]['commands'][key]:
+					msg += key + ", "
+					myTmp += 1
+			if myTmp < 1:
+				msg += "You are NOT allowed to send any command."
+			msg += "\n\n"
+		elif self.main.chats[chat_id]['allow_users']:
+			msg += "Allowed users ONLY. See specific user settings for details.\n\n"
+		else:
+			msg += "You are NOT allowed to send any command.\n\n"
+
+		msg += "*Get notification on:*\n"
+		if self.main.chats[chat_id]['send_notifications']:
+			myTmp = 0
+			for key in self.main.chats[chat_id]['notifications']:
+				if self.main.chats[chat_id]['notifications'][key]:
+					msg += key + ", "
+					myTmp += 1
+			if myTmp < 1:
+				msg += "You will receive NO notifications."
+			msg += "\n\n"
+		else:
+			msg += "You will receive NO notifications.\n\n"
+
+		self.main.send_msg(msg, chatID=chat_id, markup="Markdown")
 ############################################################################################
 	def cmdConnection(self,chat_id,from_id,cmd,parameter):
 		if parameter and parameter != "back":
