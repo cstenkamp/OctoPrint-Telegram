@@ -71,8 +71,7 @@ class TelegramListener(threading.Thread):
 		#wooooops. can't handle the message
 		except Exception as ex:
 			self._logger.error("Exception caught! " + str(ex))
-			self._logger.error(traceback.format_exc()please
-			)
+			self._logger.error(traceback.format_exc())
 			raise ex
 		self.set_status(gettext("Connected as %(username)s.", username=self.username), ok=True)
 		# we had first contact after octoprint startup
