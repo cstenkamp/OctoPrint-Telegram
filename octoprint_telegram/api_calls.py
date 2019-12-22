@@ -32,10 +32,10 @@ def post_command(url, command):
 		"command": command
 	})
 	reqres = requests.post(url, headers=requestHeaders, data=requestData)
-	result = ["CURL command:", curlify.to_curl(reqres.request)]
-	print("CURL command:", curlify.to_curl(reqres.request))
+	result = ["CURL command: "+str(curlify.to_curl(reqres.request))]
+	#print("CURL command:", curlify.to_curl(reqres.request))
 	if reqres.status_code != 200:
-		result.append(str(reqres.status_code))
+		result.append('Return code: '+str(reqres.status_code))
 		result.append(reqres.text)
 	else:
 		result.append(str(reqres.json()))

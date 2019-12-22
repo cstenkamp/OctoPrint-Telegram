@@ -45,8 +45,8 @@ class TCMD():
 			'/con': 		{'cmd': self.cmdConnection, 'param': True},
 			'/user': 		{'cmd': self.cmdUser},
 			'/tune':		{'cmd': self.cmdTune, 'param': True},
-			'/turnon': 		{'cmd': self.cmdTurnOn, 'bind_none': True},
-			# '/apicmd': 		{'cmd': self.cmdTurnOn},
+			'/turnon': 		{'cmd': self.cmdTurnOn, 'bind_none': True},  #needs to be bind_none sonst ists nicht im dict tcmd.commandDict (init.py line 787)
+			'/apicmd': 		{'cmd': self.apiCMD, 'bind_none': True, 'param': True},
 			'/help':  		{'cmd': self.cmdHelp, 'bind_none': True}
 		}
 
@@ -501,6 +501,54 @@ class TCMD():
 		self._logger.error("Turn on result: " + str(results))
 		for elem in results:
 			self.main.send_msg(elem, chatID=chat_id, markup="Markdown")
+############################################################################################
+	def apiCMD(self,chat_id,from_id,cmd,parameter):
+
+
+
+
+
+
+
+
+		if parameter and parameter != "back":
+			self._logger.error("With param")
+			self._logger.error(str(parameter))
+			# params = parameter.split('_')
+			# if params[0] == "do":
+			# 	parameter = params[1]
+			# else:
+			# 	parameter = params[0]
+			# actions = self.get_controls_recursively()
+			# command = next((d for d in actions if d['hash'] == parameter), False)
+			# if command:
+			# 	if 'confirm' in command and params[0] != "do":
+			# 		self.main.send_msg(self.gEmo('question') + unicode(command['name']) + "\nExecute control command?",responses=[[[self.main.emojis['check']+gettext("Execute"),"/ctrl_do_" + unicode(parameter)], [self.main.emojis['leftwards arrow with hook']+gettext(" Back"),"/ctrl_back"]]],chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+			# 		return
+			# 	else:
+			# 		if 'script' in command:
+			# 			try:
+			# 				self.main._printer.script(command["command"])
+			# 			except UnknownScript:
+			# 				self.main.send_msg(self.gEmo('warning') + " Unknown script: " + command['command'],chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+			# 		elif type(command['command']) is type([]):
+			# 			for key in command['command']:
+			# 				self.main._printer.commands(key)
+			# 		else:
+			# 			self.main._printer.commands(command['command'])
+			# 		self.main.send_msg(self.gEmo('check') + " Control Command " + command['name'] + " executed." ,chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+			# else:
+			# 	self.main.send_msg(self.gEmo('warning') + " Control Command not found." ,chatID=chat_id, msg_id = self.main.getUpdateMsgId(chat_id))
+		else:
+			msg_id=self.main.getUpdateMsgId(chat_id) if parameter == "back" else ""
+			self.main.send_msg('Please send the api-route (starting at /api/..)',chatID=chat_id,msg_id = msg_id)
+
+
+
+		# results = post_command('api/plugin/psucontrol', 'turnPSUOn')
+		# self._logger.error("Turn on result: " + str(results))
+		# for elem in results:
+		# 	self.main.send_msg(elem, chatID=chat_id, markup="Markdown")
 ############################################################################################
 	def cmdUser(self,chat_id,from_id,cmd,parameter):
 		msg = self.gEmo('info') + " *Your user settings:*\n\n"
