@@ -45,7 +45,7 @@ class TCMD():
 			'/con': 		{'cmd': self.cmdConnection, 'param': True},
 			'/user': 		{'cmd': self.cmdUser},
 			'/tune':		{'cmd': self.cmdTune, 'param': True},
-			'/turnon': 		{'cmd': self.cmdTurnOn},
+			'/turnon': 		{'cmd': self.cmdTurnOn, 'bind_none': True},
 			# '/apicmd': 		{'cmd': self.cmdTurnOn},
 			'/help':  		{'cmd': self.cmdHelp, 'bind_none': True}
 		}
