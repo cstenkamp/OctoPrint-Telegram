@@ -496,8 +496,9 @@ class TCMD():
 			self.main.send_msg(message,chatID=chat_id,responses=keys,msg_id = msg_id)
 ############################################################################################
 	def cmdTurnOn(self,chat_id,from_id,cmd,parameter):
+		self._logger.error("Turn on executed")
 		results = post_command('api/plugin/psucontrol', 'turnPSUOn')
-		self._logger.debug("Turn on result: " + str(results))
+		self._logger.error("Turn on result: " + str(results))
 		for elem in results:
 			self.main.send_msg(elem, chatID=chat_id, markup="Markdown")
 ############################################################################################
