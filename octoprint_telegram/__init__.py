@@ -278,7 +278,11 @@ class TelegramListener(threading.Thread):
 		if any((k+"_") in command for k,v in self.main.tcmd.commandDict.iteritems() if 'param' in v):
 			parameter = '_'.join(command.split('_')[1:])
 			command = command.split('_')[0]
-		self._logger.info("Got a command: '" + str(command.encode('utf-8')) + "' with parameter: '" + str(parameter.encode('utf-8')) + "' in chat " + str(message['message']['chat']['id']))
+		try:
+			self._logger.info("Got a command: '" + str(command.encode('utf-8')) + "' with parameter: '" + str(parameter.encode('utf-8')) + "' in chat " + str(message['message']['chat']['id']))
+		except UnicodeDecodeError:
+			self._logger.info("UnicodeDecodeError!")
+			self._logger.info("Got a command: '" + str(command) + "' with parameter: '" + str(parameter) + "' in chat " + str(message['message']['chat']['id']))
 		# is command  known?
 		if command not in self.main.tcmd.commandDict:
 			# we dont know the command so skip the message

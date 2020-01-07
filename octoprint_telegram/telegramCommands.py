@@ -46,7 +46,7 @@ class TCMD():
 			'/user': 		{'cmd': self.cmdUser},
 			'/tune':		{'cmd': self.cmdTune, 'param': True},
 			'/turnon': 		{'cmd': self.cmdTurnOn, 'bind_none': True},  #needs to be bind_none sonst ists nicht im dict tcmd.commandDict (init.py line 787)
-			'/apicmd': 		{'cmd': self.apiCMD, 'bind_none': True, 'param': True},
+			'/apicmd': 		{'cmd': self.apiCMD, 'param': True},
 			'/help':  		{'cmd': self.cmdHelp, 'bind_none': True}
 		}
 
