@@ -79,7 +79,7 @@ class TelegramListener(threading.Thread):
 					self.main.send_msg(traceback.format_exc(), chatID=chat_id, markup="Markdown")
 			except:
 				pass
-			continue #raise ex //TODO doch wieder raisen?
+			return #raise ex //TODO doch wieder raisen?
 
 		self.set_status(gettext("Connected as %(username)s.", username=self.username), ok=True)
 		# we had first contact after octoprint startup
