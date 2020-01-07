@@ -70,9 +70,17 @@ class TelegramListener(threading.Thread):
 			raise exit
 		#wooooops. can't handle the message
 		except Exception as ex:
-			self._logger.error("Exception caught! " + str(ex))
+			self._logger.error("Exception caught! " + type(ex) + str(ex))
 			self._logger.error(traceback.format_exc())
-			raise ex
+			try:
+				if 'message' in message and message['message']['chat']:
+					chat_id, from_id = self.parseUserData(message)
+					self.main.send_msg("Exception caught! " + type(ex) + '('+ str(ex) +')', chatID=chat_id, markup="Markdown")
+					self.main.send_msg(traceback.format_exc(), chatID=chat_id, markup="Markdown")
+			except:
+				pass
+			continue #raise ex //TODO doch wieder raisen?
+
 		self.set_status(gettext("Connected as %(username)s.", username=self.username), ok=True)
 		# we had first contact after octoprint startup
 		# so lets send startup message
