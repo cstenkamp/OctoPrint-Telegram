@@ -70,7 +70,7 @@ class TelegramListener(threading.Thread):
 			raise exit
 		#wooooops. can't handle the message
 		except Exception as ex:
-			self._logger.error("Exception caught! " + type(ex) + str(ex))
+			self._logger.error("Exception caught! " + str(type(ex)) + ' ' + str(ex))
 			self._logger.error(traceback.format_exc())
 			try:
 				if 'message' in message and message['message']['chat']:
